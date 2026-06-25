@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#0a0a0a;overscroll-behavior-x:none;overscroll-behavior-y:contain;}
+body{font-family:'Noto Sans JP','Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;color:#f0efe8;touch-action:pan-y;}
+/* Mobile: CSS scroll-snap for stronger "stop" feel + reduce paint complexity */
+@media (hover:none) and (pointer:coarse) {
+  html{scroll-snap-type:y proximity;scroll-padding-top:0;}
+  section[id]{scroll-snap-align:start;scroll-snap-stop:normal;}
+  /* skip heavy filters on mobile */
+  [data-hero-orb]{filter:blur(20px) !important;}
+}
+
+/* ===== MOBILE LAYOUT (≤720px) ===== */
+@media (max-width: 720px) {
+  /* Hero — collapse absolute layout into a readable stacked block */
+  [data-hero-stage]{ min-height: 100vh; padding: 96px 24px 120px !important; }
+  [data-hero-word-tl], [data-hero-word-br]{ position: static !important; font-size: 56px !important; line-height: 0.92 !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; }
+  [data-hero-word-tl]{ margin-top: 8px; }
+  [data-hero-word-br]{ margin-top: 4px; margin-bottom: 24px; text-align: right; }
+  [data-hero-textblock]{ position: static !important; transform: none !important; max-width: 100% !important; margin: 28px 0 32px !important; }
+  [data-hero-topbar]{ position: static !important; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  [data-hero-cta]{ position: static !important; margin-top: 24px; }
+  [data-hero-scrollhint]{ display: none !important; }
+  [data-hero-canvas]{ display: none !important; }
+  [data-hero-spot-wrap]{ opacity: 0.5; }
+  [data-hero-ghost]{ display: none !important; }
+
+  /* Cursor: hide native pointer follower on touch */
+  [data-cursor]{ display: none !important; }
+
+  /* Nav: tighter */
+  nav[data-nav]{ padding: 14px 18px !important; }
+  nav[data-nav] a:first-child span:last-child{ font-size: 15px !important; }
+
+  /* ISSUE — single column cards, smaller bg word */
+  [data-issue-bg]{ font-size: 120px !important; opacity: 0.04 !important; }
+  [data-issue-cards]{ grid-template-columns: 1fr !important; }
+  [data-issue-card]{ min-height: auto !important; }
+  /* Comparison table: keep horizontal scroll but smaller text */
+  [data-issue-comp] table{ min-width: 480px !important; }
+  [data-issue-comp]{ -webkit-overflow-scrolling: touch; }
+  /* Conclusion: stack vertically */
+  [data-issue-conclusion]{ flex-direction: column !important; align-items: stretch !important; }
+  [data-issue-conclusion] > div{ min-width: 0 !important; }
+
+  /* General: cap headlines and body */
+  section h2{ font-size: clamp(28px, 8vw, 42px) !important; }
+
+  /* Flow horizontal scroll: let it be a vertical stack on mobile (no pin) */
+  [data-hscroll]{ overflow: visible !important; }
+  [data-hscroll-track]{ flex-direction: column !important; transform: none !important; width: 100% !important; gap: 20px !important; }
+  [data-hscroll-card]{ width: 100% !important; flex: none !important; }
+
+  /* Marquee: smaller */
+  [data-marquee-track] span{ font-size: 28px !important; }
+
+  /* STRENGTH stats: stack to a single column (was cramped 3-up) */
+  #strength [style*="repeat(3"]{ grid-template-columns: 1fr !important; gap: 28px !important; }
+
+  /* ISSUE headline: let the 2nd line wrap instead of overflowing */
+  [data-issue-headline] span[style*="nowrap"]{ white-space: normal !important; }
+  [data-issue-marker]{ display: none !important; }
+
+  /* Nav: drop section links on small screens, keep logo + CONTACT */
+  nav[data-nav] a[href="#services"], nav[data-nav] a[href="#company"]{ display: none !important; }
+  nav[data-nav] > div{ gap: 0 !important; }
+
+  /* Hero: hide the stray blue period dot (its word renders transparent on iOS) */
+  [data-hero-period]{ display: none !important; }
+
+  /* COMPANY info: stack label above value so values aren't squeezed right */
+  #company dl > div{ grid-template-columns: 1fr !important; gap: 6px !important; }
+  #company dl dt{ font-size: 12px !important; }
+
+  /* CONTACT headline: keep it big on mobile (overrides the section h2 cap) */
+  #contact h2{ font-size: clamp(54px, 16vw, 84px) !important; line-height: 1.0 !important; }
+}
+::selection{background:#2a6fdb;color:#0a0a0a;}
+@keyframes ml-spin-y{from{transform:perspective(320px) rotateY(0deg)}to{transform:perspective(320px) rotateY(360deg)}}
+@keyframes ml-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes ml-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:0.4}}
+[data-mini-frame]:active{cursor:grabbing;}
+</style>
+</helmet>
+
+<div ref="{{ containerRef }}" style="position:relative; overflow:hidden;">
+
+<!-- ===== CURSOR (mix-blend-mode removed for perf) ===== -->
+<div data-cursor style="position:fixed;top:0;left:0;width:14px;height:14px;border-radius:50%;background:#2a6fdb;pointer-events:none;z-index:9999;will-change:transform;transform:translate(-50%,-50%) scale(0);box-shadow:0 0 0 1.5px rgba(255,255,255,0.9), 0 0 12px rgba(42,111,219,0.5);"></div>
+
+<!-- ===== PRELOADER ===== -->
+<div data-preloader style="position:fixed;inset:0;z-index:9500;background:#0a0a0a;display:flex;flex-direction:column;justify-content:flex-end;padding:6vw;will-change:transform;">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+    <div style="font-family:'Space Grotesk',sans-serif;color:#f0efe8;font-size:clamp(36px,6vw,100px);font-weight:700;line-height:0.9;letter-spacing:-0.03em;">MICHAEL<br>LIGHT</div>
+    <div style="font-family:'Space Grotesk',sans-serif;color:#2a6fdb;font-size:clamp(56px,11vw,180px);font-weight:700;line-height:0.8;letter-spacing:-0.04em;"><span data-count>00</span></div>
+  </div>
+  <div style="height:3px;width:100%;background:rgba(255,255,255,0.1);margin-top:28px;overflow:hidden;">
+    <div data-bar style="height:100%;width:100%;background:#2a6fdb;transform:scaleX(0);transform-origin:left center;"></div>
+  </div>
+</div>
+
+<!-- ===== NAV (mix-blend-mode removed; backdrop-blur frosted glass instead) ===== -->
+<nav data-nav style="position:fixed;top:0;left:0;right:0;z-index:8000;display:flex;align-items:center;justify-content:space-between;padding:20px clamp(20px,4vw,56px);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);background:rgba(10,10,10,0.28);border-bottom:1px solid rgba(255,255,255,0.06);">
+  <a href="#top" data-nav-link style="text-decoration:none;display:flex;align-items:center;gap:10px;color:#fff;">
+    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#2a6fdb;"></span>
+    <span style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.02em;">MICHAEL LIGHT</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:clamp(14px,2.4vw,36px);">
+    <a href="#services" data-nav-link style="text-decoration:none;color:#fff;font-size:13px;font-weight:700;letter-spacing:0.04em;">SERVICES</a>
+    <a href="#company" data-nav-link style="text-decoration:none;color:#fff;font-size:13px;font-weight:700;letter-spacing:0.04em;">COMPANY</a>
+    <a href="#contact" data-nav-link data-magnetic style="text-decoration:none;color:#0a0a0a;background:#2a6fdb;font-size:13px;font-weight:700;padding:10px 20px;border-radius:100px;display:inline-block;will-change:transform;">CONTACT</a>
+  </div>
+</nav>
+
+<!-- ===== HERO (clean black) ===== -->
+<section id="top" style="position:relative;height:100vh;background:#000;">
+  <div data-hero-stage style="position:relative;height:100vh;overflow:hidden;background:#000;color:#f0efe8;">
+
+    <!-- WIREFRAME SCULPTURE CANVAS -->
+    <canvas data-hero-canvas style="position:absolute;inset:0;width:100%;height:100%;z-index:1;"></canvas>
+
+    <!-- BG: mouse-tracked spotlight (translate-based for perf) + grid -->
+    <div data-hero-spot-wrap style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+      <div data-hero-spot style="position:absolute;width:1200px;height:1200px;left:calc(50% - 600px);top:calc(50% - 600px);background:radial-gradient(circle, rgba(42,111,219,0.18), transparent 60%);will-change:transform;"></div>
+    </div>
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 55%, rgba(42,111,219,0.06) 0%, transparent 50%);"></div>
+    <svg width="0" height="0" style="position:absolute;pointer-events:none;">
+      <defs><pattern id="ml-line-grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs>
+    </svg>
+    <svg data-hero-grid style="position:absolute;left:-10%;top:-10%;width:120%;height:120%;pointer-events:none;will-change:transform;"><rect width="100%" height="100%" fill="url(#ml-line-grid)"/></svg>
+
+    <!-- DRIFTING ORBS (blur reduced for paint perf) -->
+    <div data-hero-orb style="position:absolute;top:-20%;left:-15%;width:50vw;height:50vw;border-radius:50%;background:radial-gradient(circle, rgba(106,92,255,0.30), transparent 60%);filter:blur(30px);will-change:transform;pointer-events:none;"></div>
+    <div data-hero-orb style="position:absolute;bottom:-25%;right:-15%;width:48vw;height:48vw;border-radius:50%;background:radial-gradient(circle, rgba(42,111,219,0.28), transparent 60%);filter:blur(30px);will-change:transform;pointer-events:none;"></div>
+
+    <!-- TOP-LEFT BIG WORD -->
+    <div data-hero-word-tl style="position:absolute;top:clamp(120px,16vh,180px);left:clamp(40px,5vw,80px);font-family:'Space Grotesk',sans-serif;font-weight:900;font-style:italic;font-size:clamp(80px,14vw,260px);line-height:0.85;letter-spacing:-0.05em;z-index:3;pointer-events:none;will-change:transform,opacity;background:linear-gradient(180deg, #ffffff 0%, #f0efe8 55%, rgba(240,239,232,0.25) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 60px rgba(255,255,255,0.08);">
+      <span style="position:relative;display:inline-block;">SYSTEM
+        <span data-hero-ghost data-d="tl" aria-hidden="true" style="position:absolute;top:0;left:0;font-style:italic;color:transparent;-webkit-text-stroke:1.5px rgba(42,111,219,0.55);transform:translate(8px,8px);pointer-events:none;will-change:transform,opacity;">SYSTEM</span>
+      </span>
+    </div>
+
+    <!-- BOTTOM-RIGHT BIG WORD -->
+    <div data-hero-word-br style="position:absolute;bottom:clamp(60px,8vh,110px);right:clamp(40px,5vw,80px);font-family:'Space Grotesk',sans-serif;font-weight:900;font-style:italic;font-size:clamp(80px,14vw,260px);line-height:0.85;letter-spacing:-0.05em;z-index:3;pointer-events:none;will-change:transform,opacity;text-align:right;background:linear-gradient(180deg, #ffffff 0%, #f0efe8 55%, rgba(240,239,232,0.25) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 60px rgba(255,255,255,0.08);">
+      <span style="position:relative;display:inline-block;">IGNITED<span data-hero-period style="color:#2a6fdb;-webkit-text-fill-color:#2a6fdb;display:inline-block;will-change:transform;">.</span>
+        <span data-hero-ghost data-d="br" aria-hidden="true" style="position:absolute;top:0;left:0;font-style:italic;color:transparent;-webkit-text-stroke:1.5px rgba(106,92,255,0.55);transform:translate(-8px,8px);pointer-events:none;will-change:transform,opacity;">IGNITED.</span>
+      </span>
+    </div>
+
+    <!-- LEFT TEXT BLOCK -->
+    <div data-hero-textblock style="position:absolute;top:50%;left:clamp(40px,5vw,80px);transform:translateY(-50%);max-width:clamp(280px,32vw,440px);z-index:4;font-family:'Space Grotesk',ui-monospace,monospace;font-size:clamp(13px,1vw,15px);line-height:1.7;color:rgba(240,239,232,0.85);">
+      <div style="font-size:11px;letter-spacing:0.4em;color:#2a6fdb;margin-bottom:18px;font-weight:700;">> SYSTEM DIVISION</div>
+      <div style="font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:clamp(20px,1.9vw,28px);color:#f0efe8;line-height:1.45;margin-bottom:16px;">デザインと技術を、ひとつに。</div>
+      <div style="color:rgba(240,239,232,0.55);">要件定義からデザインまでワンストップ。<br>AIネイティブな開発体制で、スピードと品質を両立。</div>
+    </div>
+
+    <!-- TOP NAV-ish status -->
+    <div data-hero-topbar style="position:absolute;top:clamp(84px,10vh,112px);left:clamp(40px,5vw,80px);right:clamp(40px,5vw,80px);display:flex;justify-content:space-between;align-items:center;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.32em;color:rgba(240,239,232,0.6);z-index:5;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="display:inline-block;width:8px;height:8px;background:#2a6fdb;border-radius:50%;box-shadow:0 0 12px #2a6fdb;"></span>
+        <span>EST. 2018 / TOKYO, JAPAN</span>
+      </div>
+      <div>OPEN FOR PROJECTS</div>
+    </div>
+
+    <!-- BIG CTA -->
+    <a href="#contact" data-hero-cta data-nav-link data-magnetic style="position:absolute;bottom:clamp(60px,8vh,110px);left:clamp(40px,5vw,80px);display:inline-flex;align-items:center;gap:14px;background:#2a6fdb;color:#0a0a0a;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;letter-spacing:0.04em;padding:18px 28px;border-radius:100px;z-index:5;will-change:transform;box-shadow:0 16px 40px rgba(42,111,219,0.3);">
+      <span>START A PROJECT</span>
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#0a0a0a;color:#2a6fdb;font-size:12px;">→</span>
+    </a>
+
+    <!-- SCROLL HINT -->
+    <div data-hero-scrollhint style="position:absolute;top:50%;right:clamp(40px,5vw,80px);transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;display:flex;align-items:center;gap:14px;font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.4em;color:rgba(240,239,232,0.55);z-index:5;">
+      <span style="display:inline-block;width:24px;height:1px;background:rgba(240,239,232,0.5);"></span>
+      <span>SCROLL TO ENTER</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===== ISSUE ===== -->
+<section id="issue" style="position:relative;background:#f0efe8;color:#0a0a0a;padding:clamp(100px,16vh,200px) clamp(20px,4vw,56px);overflow:hidden;">
+  <!-- flash sweep bars -->
+  <div data-issue-flash style="position:absolute;left:0;right:0;top:0;height:10px;background:#2a6fdb;transform-origin:left center;transform:scaleX(0);z-index:5;pointer-events:none;"></div>
+  <div data-issue-flash2 style="position:absolute;left:0;right:0;top:10px;height:4px;background:#0a0a0a;transform-origin:right center;transform:scaleX(0);z-index:5;pointer-events:none;"></div>
+
+  <!-- decorative bg word -->
+  <div aria-hidden="true" data-issue-bg style="position:absolute;top:6%;right:-4%;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:clamp(180px,28vw,520px);line-height:0.8;letter-spacing:-0.05em;color:transparent;-webkit-text-stroke:1.5px rgba(10,10,10,0.05);pointer-events:none;user-select:none;will-change:transform,opacity;">ISSUE</div>
+
+  <div style="position:relative;z-index:2;max-width:1400px;margin:0 auto;">
+
+    <!-- HEAD -->
+    <div data-issue-eyebrow style="display:flex;align-items:center;gap:14px;font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:700;letter-spacing:0.32em;color:#0a0a0a;margin-bottom:clamp(24px,4vh,44px);will-change:transform,opacity;">
+      <span style="display:inline-block;width:32px;height:1px;background:#0a0a0a;"></span>
+      <span>ISSUE / 001</span>
+    </div>
+
+    <h2 data-issue-headline style="font-weight:900;line-height:1.04;letter-spacing:-0.025em;font-size:clamp(34px,5.6vw,92px);">なぜ、システム開発は<br><span style="white-space:nowrap;display:inline-block;"><span style="color:#2a6fdb;position:relative;display:inline-block;">"思った通り"<svg data-issue-marker viewBox="0 0 320 24" preserveAspectRatio="none" style="position:absolute;left:-2%;right:-2%;bottom:-0.18em;width:104%;height:0.22em;overflow:visible;pointer-events:none;"><path d="M4 14 Q 60 2, 130 11 T 260 9 T 316 12" stroke="#2a6fdb" stroke-width="6" fill="none" stroke-linecap="round" pathLength="1" style="stroke-dasharray:1;stroke-dashoffset:1;"/></svg></span>にならないのか。</span></h2>
+
+    <p data-issue-sub style="margin:clamp(28px,4.5vh,52px) 0 clamp(56px,9vh,100px);max-width:720px;font-size:clamp(15px,1.4vw,19px);line-height:1.9;color:#444;font-weight:500;">「もっと使いやすく、もっとデザインの良いものを作りたい」——そう願って依頼したはずなのに、終わってみれば想定の倍のコスト、間延びしたスケジュール、当初のイメージとはほど遠いUI。多くの経営者が、3つの構造的な問題に直面しています。</p>
+
+    <!-- 3 PROBLEM CARDS (numbered, larger, with concrete examples) -->
+    <div data-issue-label style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.3em;color:#888;margin-bottom:24px;overflow:hidden;"><span data-label-inner style="display:inline-block;will-change:transform;">— 3 STRUCTURAL PROBLEMS</span></div>
+
+    <div data-issue-cards style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(16px,2vw,28px);margin-bottom:clamp(64px,10vh,120px);perspective:1400px;">
+
+      <article data-issue-card data-i="0" style="background:#fff;border-radius:24px;padding:clamp(28px,3vw,40px);box-shadow:0 12px 36px rgba(10,10,10,0.06);display:flex;flex-direction:column;min-height:380px;border-top:6px solid #ff2d78;will-change:transform,opacity;transform-style:preserve-3d;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:clamp(24px,4vh,40px);">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,5vw,72px);font-weight:700;line-height:0.9;color:#ff2d78;letter-spacing:-0.02em;">01</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;color:#888;padding:8px 12px;border:1px solid #d4d2c8;border-radius:100px;">COST</span>
+        </div>
+        <h3 style="font-weight:900;font-size:clamp(20px,1.9vw,26px);line-height:1.4;margin-bottom:14px;letter-spacing:-0.01em;">大手に頼むと、<br>コストが膨らむ。</h3>
+        <p style="font-size:14.5px;line-height:1.85;color:#555;font-weight:500;flex:1;">体制は整っているが、要件変更のたびに見積もり交渉。承認フローが多く、小さな改善まで大きな工数になる。</p>
+        <div style="margin-top:24px;padding-top:18px;border-top:1px dashed #d4d2c8;font-size:12.5px;font-weight:600;color:#888;line-height:1.6;"><span style="color:#ff2d78;font-weight:900;">よくある声 ↳</span><br>「ちょっと直したいだけなのに、また見積もり…」</div>
+      </article>
+
+      <article data-issue-card data-i="1" style="background:#fff;border-radius:24px;padding:clamp(28px,3vw,40px);box-shadow:0 12px 36px rgba(10,10,10,0.06);display:flex;flex-direction:column;min-height:380px;border-top:6px solid #ff7a00;will-change:transform,opacity;transform-style:preserve-3d;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:clamp(24px,4vh,40px);">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,5vw,72px);font-weight:700;line-height:0.9;color:#ff7a00;letter-spacing:-0.02em;">02</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;color:#888;padding:8px 12px;border:1px solid #d4d2c8;border-radius:100px;">QUALITY</span>
+        </div>
+        <h3 style="font-weight:900;font-size:clamp(20px,1.9vw,26px);line-height:1.4;margin-bottom:14px;letter-spacing:-0.01em;">個人に頼むと、<br>品質が読めない。</h3>
+        <p style="font-size:14.5px;line-height:1.85;color:#555;font-weight:500;flex:1;">柔軟でスピードは出るが、属人的でスケジュールが揺らぐ。ドキュメントが残らず、引き継ぎに困ることも多い。</p>
+        <div style="margin-top:24px;padding-top:18px;border-top:1px dashed #d4d2c8;font-size:12.5px;font-weight:600;color:#888;line-height:1.6;"><span style="color:#ff7a00;font-weight:900;">よくある声 ↳</span><br>「来週納品って言ってたのに、連絡がつかない…」</div>
+      </article>
+
+      <article data-issue-card data-i="2" style="background:#fff;border-radius:24px;padding:clamp(28px,3vw,40px);box-shadow:0 12px 36px rgba(10,10,10,0.06);display:flex;flex-direction:column;min-height:380px;border-top:6px solid #6a5cff;will-change:transform,opacity;transform-style:preserve-3d;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:clamp(24px,4vh,40px);">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,5vw,72px);font-weight:700;line-height:0.9;color:#6a5cff;letter-spacing:-0.02em;">03</span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.25em;color:#888;padding:8px 12px;border:1px solid #d4d2c8;border-radius:100px;">DESIGN</span>
+        </div>
+        <h3 style="font-weight:900;font-size:clamp(20px,1.9vw,26px);line-height:1.4;margin-bottom:14px;letter-spacing:-0.01em;">デザインと実装が、<br>分断する。</h3>
+        <p style="font-size:14.5px;line-height:1.85;color:#555;font-weight:500;flex:1;">デザインを別会社で作り、実装は別チーム。意図が伝わらず、再現度が落ち、何度も作り直しに。</p>
+        <div style="margin-top:24px;padding-top:18px;border-top:1px dashed #d4d2c8;font-size:12.5px;font-weight:600;color:#888;line-height:1.6;"><span style="color:#6a5cff;font-weight:900;">よくある声 ↳</span><br>「カンプは綺麗だったのに、実装したらズレてる…」</div>
+      </article>
+
+    </div>
+
+    <!-- COMPARISON TABLE -->
+    <div data-issue-label style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.3em;color:#888;margin-bottom:24px;overflow:hidden;"><span data-label-inner style="display:inline-block;will-change:transform;">— SIDE-BY-SIDE COMPARISON</span></div>
+
+    <div data-issue-comp style="background:#0a0a0a;color:#f0efe8;border-radius:24px;padding:clamp(24px,3vw,40px);overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:560px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:14px 16px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.25em;color:#888;border-bottom:1px solid rgba(255,255,255,0.15);"></th>
+            <th style="text-align:center;padding:14px 16px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;color:#888;border-bottom:1px solid rgba(255,255,255,0.15);">大手SIer</th>
+            <th style="text-align:center;padding:14px 16px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;color:#888;border-bottom:1px solid rgba(255,255,255,0.15);">フリーランス</th>
+            <th style="text-align:center;padding:14px 16px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;color:#2a6fdb;border-bottom:1px solid #2a6fdb;background:rgba(42,111,219,0.08);border-radius:8px 8px 0 0;">ミカエルライト</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:18px 16px;font-weight:700;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.08);">コスト効率</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#ff7a00;border-bottom:1px solid rgba(255,255,255,0.08);">△</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;border-bottom:1px solid rgba(255,255,255,0.08);">○</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(42,111,219,0.06);">◎</td>
+          </tr>
+          <tr>
+            <td style="padding:18px 16px;font-weight:700;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.08);">品質の安定性</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;border-bottom:1px solid rgba(255,255,255,0.08);">○</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#ff7a00;border-bottom:1px solid rgba(255,255,255,0.08);">△</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(42,111,219,0.06);">◎</td>
+          </tr>
+          <tr>
+            <td style="padding:18px 16px;font-weight:700;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.08);">スピード・柔軟性</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#ff7a00;border-bottom:1px solid rgba(255,255,255,0.08);">△</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;border-bottom:1px solid rgba(255,255,255,0.08);">○</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(42,111,219,0.06);">◎</td>
+          </tr>
+          <tr>
+            <td style="padding:18px 16px;font-weight:700;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.08);">デザインと実装の一体性</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#ff7a00;border-bottom:1px solid rgba(255,255,255,0.08);">△</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#ff2d78;border-bottom:1px solid rgba(255,255,255,0.08);">×</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(42,111,219,0.06);">◎</td>
+          </tr>
+          <tr>
+            <td style="padding:18px 16px;font-weight:700;font-size:14px;">意思決定の速さ</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#ff7a00;">△</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;">○</td>
+            <td style="text-align:center;padding:18px 16px;font-size:22px;font-weight:900;color:#2a6fdb;background:rgba(42,111,219,0.06);border-radius:0 0 8px 8px;">◎</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CONCLUSION -->
+    <div data-issue-conclusion style="margin-top:clamp(56px,9vh,100px);padding:clamp(28px,4vw,48px);background:#2a6fdb;color:#0a0a0a;border-radius:24px;display:flex;align-items:center;gap:clamp(20px,3vw,40px);flex-wrap:wrap;justify-content:space-between;will-change:transform,opacity,clip-path;">
+      <div style="flex:1;min-width:260px;">
+        <div data-conclusion-label style="font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.32em;margin-bottom:14px;">— ANSWER</div>
+        <div data-conclusion-text style="font-weight:900;font-size:clamp(22px,2.8vw,42px);line-height:1.3;letter-spacing:-0.015em;">ミカエルライトは、<br>3つすべてを<span style="text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;">構造から解消します。</span></div>
+      </div>
+      <a href="#strength" data-nav-link data-conclusion-cta style="display:inline-flex;align-items:center;gap:14px;background:#0a0a0a;color:#2a6fdb;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:14px;letter-spacing:0.04em;padding:18px 26px;border-radius:100px;flex:none;will-change:transform,opacity;">
+        <span>強みを見る</span>
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#2a6fdb;color:#0a0a0a;font-size:12px;">→</span>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== STRENGTH ===== -->
+<section id="strength" style="position:relative;background:#0a0a0a;color:#f0efe8;padding:clamp(80px,14vh,180px) clamp(20px,4vw,56px);overflow:hidden;">
+  <div data-parallax="0.3" style="position:absolute;top:10%;right:-6%;width:clamp(140px,20vw,320px);height:clamp(140px,20vw,320px);border-radius:50%;border:2px solid #6a5cff;"></div>
+  <div style="position:relative;z-index:2;max-width:1400px;margin:0 auto;">
+    <div data-reveal style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:600;letter-spacing:0.25em;color:#2a6fdb;margin-bottom:clamp(20px,4vh,44px);">STRENGTH</div>
+    <h2 data-split-reveal style="font-weight:900;line-height:1.02;letter-spacing:-0.02em;font-size:clamp(32px,6vw,110px);">デザインと技術が、<br>最初から<span style="color:#2a6fdb;">同じ場所に。</span></h2>
+    <p data-reveal style="margin:clamp(24px,4vh,48px) 0 clamp(52px,9vh,100px);max-width:680px;font-size:clamp(15px,1.4vw,20px);line-height:1.9;color:#aaa;">デザイナーとエンジニアが分業するのではなく、一体となって動く。デザインの意図を理解したまま実装に落とし込み、実装の制約を踏まえてデザインを磨く。このサイクルがひとつのチームの中で完結します。</p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,44px);">
+      <div data-reveal style="border-top:2px solid rgba(255,255,255,0.18);padding-top:24px;">
+        <div data-counter="15" style="font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,4.4vw,72px);font-weight:700;color:#2a6fdb;line-height:1;">0</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#888;margin:8px 0 14px;">INDUSTRIES</div>
+        <p style="font-size:15px;line-height:1.8;color:#999;">金融・自動車・AI・ECなど15業種を横断した豊富な経験</p>
+      </div>
+      <div data-reveal style="border-top:2px solid rgba(255,255,255,0.18);padding-top:24px;">
+        <div data-counter="80" style="font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,4.4vw,72px);font-weight:700;color:#ff2d78;line-height:1;">0</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#888;margin:8px 0 14px;">PEAK PM SCALE</div>
+        <p style="font-size:15px;line-height:1.8;color:#999;">代表が過去マネジメントしてきた、最大80名規模のプロジェクト実績</p>
+      </div>
+      <div data-reveal style="border-top:2px solid rgba(255,255,255,0.18);padding-top:24px;">
+        <div data-counter="4" style="font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,4.4vw,72px);font-weight:700;color:#ff7a00;line-height:1;">0</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.1em;color:#888;margin:8px 0 14px;">GLOBAL EXPERIENCE</div>
+        <p style="font-size:15px;line-height:1.8;color:#999;">日本・中国・インド・フランスの4カ国メンバーとプロジェクトを推進してきた経験</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVICES ===== -->
+<section id="services" style="background:#f0efe8;color:#0a0a0a;padding:clamp(80px,14vh,180px) clamp(20px,4vw,56px);">
+  <div style="max-width:1400px;margin:0 auto;display:flex;gap:clamp(40px,6vw,110px);align-items:flex-start;flex-wrap:wrap;">
+    <div style="flex:1 1 280px;position:sticky;top:14vh;">
+      <div data-reveal style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:600;letter-spacing:0.25em;color:#888;margin-bottom:18px;">SERVICES</div>
+      <h2 data-reveal style="font-weight:900;line-height:0.95;font-size:clamp(40px,5vw,86px);letter-spacing:-0.02em;">提供内容</h2>
+      <p data-reveal style="margin:22px 0 40px;font-size:clamp(15px,1.4vw,18px);line-height:1.85;color:#555;max-width:400px;">フロントエンドのデザイン設計から、バックエンド・インフラの構築まで、ワンストップで対応します。</p>
+      <div data-reveal style="display:flex;flex-direction:column;gap:14px;">
+        <div data-svc-prog style="display:flex;align-items:center;gap:14px;opacity:0.3;transition:opacity .4s,color .4s;" data-accent="#2a6fdb">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;min-width:24px;">01</span>
+          <span style="font-weight:700;font-size:14px;">Webアプリケーション開発</span>
+        </div>
+        <div data-svc-prog style="display:flex;align-items:center;gap:14px;opacity:0.3;transition:opacity .4s,color .4s;" data-accent="#ff7a00">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;min-width:24px;">02</span>
+          <span style="font-weight:700;font-size:14px;">スマホアプリ開発</span>
+        </div>
+        <div data-svc-prog style="display:flex;align-items:center;gap:14px;opacity:0.3;transition:opacity .4s,color .4s;" data-accent="#6a5cff">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;min-width:24px;">03</span>
+          <span style="font-weight:700;font-size:14px;">業務システム開発</span>
+        </div>
+        <div data-svc-prog style="display:flex;align-items:center;gap:14px;opacity:0.3;transition:opacity .4s,color .4s;" data-accent="#ff2d78">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;min-width:24px;">04</span>
+          <span style="font-weight:700;font-size:14px;">リニューアル・改善</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:2 1 520px;display:flex;flex-direction:column;">
+      <article data-svc-block style="border-top:2px solid #0a0a0a;padding:clamp(40px,7vh,84px) 0;">
+        <div style="display:flex;align-items:flex-start;gap:clamp(16px,2.4vw,36px);">
+          <div data-svc-num style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,76px);font-weight:700;line-height:0.9;color:#2a6fdb;">01</div>
+          <div style="flex:1;min-width:0;">
+            <h3 style="overflow:hidden;"><span data-svc-line style="display:block;font-weight:900;font-size:clamp(24px,3.2vw,46px);line-height:1.1;">Webアプリケーション開発</span></h3>
+            <div data-svc-rule style="height:3px;background:#2a6fdb;margin:20px 0;transform:scaleX(0);transform-origin:left;"></div>
+            <p style="font-size:clamp(15px,1.3vw,18px);line-height:1.85;color:#555;max-width:520px;">デザイン性と使い心地を両立した、モダンなWebアプリをゼロから設計・構築。</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;">
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">UI/UX設計</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">フロントエンド</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">API・基盤</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article data-svc-block style="border-top:2px solid #0a0a0a;padding:clamp(40px,7vh,84px) 0;">
+        <div style="display:flex;align-items:flex-start;gap:clamp(16px,2.4vw,36px);">
+          <div data-svc-num style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,76px);font-weight:700;line-height:0.9;color:#ff7a00;">02</div>
+          <div style="flex:1;min-width:0;">
+            <h3 style="overflow:hidden;"><span data-svc-line style="display:block;font-weight:900;font-size:clamp(24px,3.2vw,46px);line-height:1.1;">スマホアプリ開発</span></h3>
+            <div data-svc-rule style="height:3px;background:#ff7a00;margin:20px 0;transform:scaleX(0);transform-origin:left;"></div>
+            <p style="font-size:clamp(15px,1.3vw,18px);line-height:1.85;color:#555;max-width:520px;">手触りの良いUIと安定した動作を両立する、iOS・Androidアプリを開発。</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;">
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">iOS</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">Android</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">クロスプラットフォーム</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article data-svc-block style="border-top:2px solid #0a0a0a;padding:clamp(40px,7vh,84px) 0;">
+        <div style="display:flex;align-items:flex-start;gap:clamp(16px,2.4vw,36px);">
+          <div data-svc-num style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,76px);font-weight:700;line-height:0.9;color:#6a5cff;">03</div>
+          <div style="flex:1;min-width:0;">
+            <h3 style="overflow:hidden;"><span data-svc-line style="display:block;font-weight:900;font-size:clamp(24px,3.2vw,46px);line-height:1.1;">業務システム開発</span></h3>
+            <div data-svc-rule style="height:3px;background:#6a5cff;margin:20px 0;transform:scaleX(0);transform-origin:left;"></div>
+            <p style="font-size:clamp(15px,1.3vw,18px);line-height:1.85;color:#555;max-width:520px;">現場の業務に寄り添い、運営する人が誇りを持てるシステムを丁寧に。</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;">
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">業務フロー設計</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">バックエンド</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">インフラ</span>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article data-svc-block style="border-top:2px solid #0a0a0a;border-bottom:2px solid #0a0a0a;padding:clamp(40px,7vh,84px) 0;">
+        <div style="display:flex;align-items:flex-start;gap:clamp(16px,2.4vw,36px);">
+          <div data-svc-num style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,76px);font-weight:700;line-height:0.9;color:#ff2d78;">04</div>
+          <div style="flex:1;min-width:0;">
+            <h3 style="overflow:hidden;"><span data-svc-line style="display:block;font-weight:900;font-size:clamp(24px,3.2vw,46px);line-height:1.1;">リニューアル・改善</span></h3>
+            <div data-svc-rule style="height:3px;background:#ff2d78;margin:20px 0;transform:scaleX(0);transform-origin:left;"></div>
+            <p style="font-size:clamp(15px,1.3vw,18px);line-height:1.85;color:#555;max-width:520px;">既存システムの課題を構造から見直し、本来の輝きを引き出す。</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;">
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">課題分析</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">段階的移行</span>
+              <span style="font-size:12px;font-weight:700;color:#666;background:#e6e4db;padding:6px 13px;border-radius:100px;">改善</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FLOW (horizontal pin) ===== -->
+<section id="flow" data-hscroll style="position:relative;background:#141414;height:100vh;overflow:hidden;">
+  <div data-track style="display:flex;height:100%;align-items:center;gap:clamp(18px,2vw,32px);padding:0 clamp(20px,4vw,56px);width:max-content;">
+    <div style="flex:none;width:clamp(280px,36vw,480px);color:#f0efe8;">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:600;letter-spacing:0.25em;color:#2a6fdb;">FLOW</div>
+      <h2 style="margin:14px 0 20px;font-weight:900;line-height:0.95;font-size:clamp(38px,5vw,80px);letter-spacing:-0.02em;">開発の流れ</h2>
+      <p style="font-size:clamp(14px,1.3vw,18px);line-height:1.8;color:#999;max-width:380px;">要求定義から保守まで、全8ステップ。最後まで伴走します。</p>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#2a6fdb;color:#0a0a0a;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">01</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">要求定義</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.8;">やりたいこと・課題をヒアリングし、ゴールを言語化。</p></div>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#6a5cff;color:#fff;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">02</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">要件定義</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.85;">実現すべき機能と範囲を整理し、仕様として固める。</p></div>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#ff2d78;color:#fff;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">03</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">設計</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.85;">画面・データ・システム構成を設計図に落とし込む。</p></div>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#ff7a00;color:#0a0a0a;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">04</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">構築</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.8;">デザインと実装を一体で進め、動くシステムを作る。</p></div>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#2a6fdb;color:#0a0a0a;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">05</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">テスト</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.8;">品質を多角的に検証し、安心して使える状態へ。</p></div>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#6a5cff;color:#fff;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">06</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">導入</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.85;">本番環境へ反映し、業務運用へスムーズに乗せる。</p></div>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#ff2d78;color:#fff;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">07</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">運用とサポート</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.85;">リリース後も伴走し、安定稼働を支える。</p></div>
+    </div>
+    <div style="flex:none;width:clamp(260px,30vw,400px);height:clamp(340px,58vh,520px);background:#ff7a00;color:#0a0a0a;border-radius:20px;padding:clamp(24px,2.4vw,36px);display:flex;flex-direction:column;justify-content:space-between;margin-right:clamp(20px,4vw,56px);">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(48px,7vw,100px);font-weight:700;line-height:0.8;">08</span><span style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.2em;opacity:0.5;">STEP</span></div>
+      <div><h3 style="font-weight:900;font-size:clamp(22px,2.6vw,36px);line-height:1.1;margin-bottom:10px;">保守メンテナンス</h3><p style="font-size:clamp(13px,1vw,16px);line-height:1.7;opacity:0.8;">改善を重ね、システムの価値を育て続ける。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MANIFESTO ===== -->
+<section id="manifesto" data-zoom-section style="position:relative;background:#0a0a0a;color:#f0efe8;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+  <span data-zoom-eyebrow style="position:absolute;top:9vh;left:50%;transform:translateX(-50%);font-family:'Space Grotesk',sans-serif;letter-spacing:0.3em;font-size:clamp(11px,0.9vw,14px);font-weight:600;color:#2a6fdb;white-space:nowrap;">PHILOSOPHY</span>
+  <div data-zoom style="text-align:center;will-change:transform;padding:0 5vw;">
+    <h2 style="font-weight:900;line-height:1.05;letter-spacing:-0.03em;font-size:clamp(34px,5.4vw,96px);">それぞれが輝く<br><span style="color:#2a6fdb;">今を創造する</span></h2>
+  </div>
+</section>
+
+<!-- ===== COMPANY ===== -->
+<section id="company" style="background:#f0efe8;color:#0a0a0a;padding:clamp(80px,14vh,180px) clamp(20px,4vw,56px);">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div data-reveal style="display:flex;align-items:flex-start;justify-content:space-between;gap:32px;margin-bottom:clamp(48px,7vh,80px);flex-wrap:wrap;">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:600;letter-spacing:0.25em;color:#888;margin-bottom:14px;">COMPANY</div>
+        <h2 style="font-weight:900;line-height:0.95;font-size:clamp(40px,5vw,86px);letter-spacing:-0.02em;">会社情報</h2>
+      </div>
+      <img src="logo.png" alt="株式会社ミカエルライト" style="width:clamp(120px,11vw,170px);height:auto;flex:none;mix-blend-mode:multiply;">
+    </div>
+    <dl style="display:grid;grid-template-columns:1fr;gap:0;">
+      <div data-reveal style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:20px;padding:18px 0;border-bottom:1px solid #d4d2c8;">
+        <dt style="font-weight:700;color:#888;font-size:13px;">社名</dt><dd style="font-weight:700;font-size:clamp(16px,1.4vw,20px);">株式会社ミカエルライト</dd>
+      </div>
+      <div data-reveal style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:20px;padding:18px 0;border-bottom:1px solid #d4d2c8;">
+        <dt style="font-weight:700;color:#888;font-size:13px;">代表取締役</dt><dd style="font-weight:700;font-size:clamp(16px,1.4vw,20px);">石川 裕之</dd>
+      </div>
+      <div data-reveal style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:20px;padding:18px 0;border-bottom:1px solid #d4d2c8;">
+        <dt style="font-weight:700;color:#888;font-size:13px;">設立</dt><dd style="font-weight:700;font-size:clamp(16px,1.4vw,20px);">2023年10月</dd>
+      </div>
+      <div data-reveal style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:20px;padding:18px 0;border-bottom:1px solid #d4d2c8;">
+        <dt style="font-weight:700;color:#888;font-size:13px;">所在地</dt><dd style="font-weight:700;font-size:clamp(16px,1.4vw,20px);">東京都中央区銀座6-6-1<br><span style="font-weight:500;color:#444;font-size:0.92em;">銀座風月堂ビル5F</span></dd>
+      </div>
+      <div data-reveal style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:20px;padding:18px 0;border-bottom:1px solid #d4d2c8;">
+        <dt style="font-weight:700;color:#888;font-size:13px;">事業内容</dt><dd style="font-weight:700;font-size:clamp(16px,1.4vw,20px);">ITコンサルティング事業 ／ システム開発事業 ／ エンターテインメント事業</dd>
+      </div>
+      <div data-reveal style="display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:20px;padding:18px 0;border-bottom:1px solid #d4d2c8;">
+        <dt style="font-weight:700;color:#888;font-size:13px;">WEB</dt><dd style="font-weight:700;font-size:clamp(16px,1.4vw,20px);"><a href="https://michael-light.co.jp" target="_blank" rel="noopener" style="color:#0a0a0a;text-decoration:none;border-bottom:2px solid #2a6fdb;padding-bottom:2px;">michael-light.co.jp</a></dd>
+      </div>
+    </dl>
+
+    <div data-reveal style="border-top:2px solid #0a0a0a;padding-top:clamp(28px,5vh,52px);margin-top:clamp(52px,9vh,100px);">
+      <div style="max-width:880px;margin-bottom:clamp(40px,7vh,80px);">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:600;letter-spacing:0.25em;color:#2a6fdb;margin-bottom:20px;">WHY US</div>
+        <h3 style="font-weight:900;line-height:1.25;letter-spacing:-0.02em;font-size:clamp(24px,3.4vw,52px);margin-bottom:24px;">このチームを、<br>信頼していただく理由。</h3>
+        <p style="font-size:clamp(15px,1.5vw,21px);line-height:1.85;color:#444;font-weight:500;">ミカエルライトのシステム開発を率いるのは、大手企業の開発現場で<span style="color:#0a0a0a;font-weight:800;border-bottom:3px solid #2a6fdb;padding-bottom:1px;">12年</span><br>プロジェクトを前に進め続けてきた人間です。</p>
+      </div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:600;letter-spacing:0.25em;color:#888;margin-bottom:28px;">PROFILE</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(28px,5vw,72px);align-items:start;">
+        <div>
+          <h3 style="font-weight:900;font-size:clamp(24px,2.8vw,40px);margin-bottom:6px;">石川 裕之</h3>
+          <div style="font-weight:700;color:#888;font-size:13px;margin-bottom:24px;">代表取締役</div>
+          <p style="font-size:clamp(14px,1.3vw,17px);line-height:1.9;color:#444;">2013年よりシステム開発に従事。大手システムインテグレーターを起点に、PM・PMO・PdMとして、金融・自動車・出版・ゲーム・EC・通信・飲料・商社・アパレル・物流・AI・人材・広告・官公庁・映像制作の15業種を横断。要件定義からリリース・運用までの全工程を経験し、日本・中国・インド・フランスにまたがる体制をマネジメントしてきた。扱ってきたのはシステム開発だけにとどまらず、組織マネジメントや人事、政策調査まで——領域を問わず、「プロジェクトを前に進めること」そのものに向き合ってきた。</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;">
+            <span style="border:1.5px solid #0a0a0a;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;">開発歴 12年</span>
+            <span style="border:1.5px solid #0a0a0a;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;">15業種</span>
+            <span style="border:1.5px solid #0a0a0a;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;">全工程経験</span>
+            <span style="border:1.5px solid #0a0a0a;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;">グローバルPJ経験</span>
+            <span style="border:1.5px solid #0a0a0a;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:700;">PM最大80名</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;letter-spacing:0.1em;color:#888;font-weight:700;margin-bottom:16px;">主なプロジェクト</div>
+          <div style="display:flex;flex-direction:column;">
+            <div data-reveal style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:14px 0;border-bottom:1px solid #d4d2c8;">
+              <span style="font-weight:900;color:#6a5cff;font-size:13px;">金融</span><span style="font-weight:700;font-size:14px;">会員制Webシステム全面リライト</span><span style="font-size:11px;color:#888;font-weight:700;">TL</span>
+            </div>
+            <div data-reveal style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:14px 0;border-bottom:1px solid #d4d2c8;">
+              <span style="font-weight:900;color:#ff2d78;font-size:13px;">自動車</span><span style="font-weight:700;font-size:14px;">車両診断システム移行（日本・中国・インド・フランス）</span><span style="font-size:11px;color:#888;font-weight:700;">PM</span>
+            </div>
+            <div data-reveal style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:14px 0;border-bottom:1px solid #d4d2c8;">
+              <span style="font-weight:900;color:#ff7a00;font-size:13px;">AI</span><span style="font-weight:700;font-size:14px;">AIプラットフォーム開発・運用</span><span style="font-size:11px;color:#888;font-weight:700;">PMO</span>
+            </div>
+            <div data-reveal style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:14px 0;border-bottom:1px solid #d4d2c8;">
+              <span style="font-weight:900;color:#6a5cff;font-size:13px;">EC</span><span style="font-weight:700;font-size:14px;">オーディオブックEC</span><span style="font-size:11px;color:#888;font-weight:700;">PdM</span>
+            </div>
+            <div data-reveal style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:14px 0;border-bottom:1px solid #d4d2c8;">
+              <span style="font-weight:900;color:#ff2d78;font-size:13px;">人材</span><span style="font-weight:700;font-size:14px;">基幹システム刷新（ベンダー10社）</span><span style="font-size:11px;color:#888;font-weight:700;">PMO</span>
+            </div>
+            <div data-reveal style="display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:14px 0;border-bottom:1px solid #d4d2c8;">
+              <span style="font-weight:900;color:#ff7a00;font-size:13px;">映像</span><span style="font-weight:700;font-size:14px;">アニメ制作スタジオ</span><span style="font-size:11px;color:#888;font-weight:700;">MGR</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact" style="position:relative;background:#0a0a0a;color:#f0efe8;padding:clamp(90px,16vh,200px) clamp(20px,4vw,56px) clamp(40px,6vh,64px);overflow:hidden;">
+  <div data-parallax="0.3" style="position:absolute;top:16%;right:8%;width:clamp(70px,10vw,150px);height:clamp(70px,10vw,150px);border-radius:50%;border:2px solid #2a6fdb;"></div>
+  <div style="position:relative;z-index:2;max-width:1300px;margin:0 auto;">
+    <div data-reveal style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1vw,14px);font-weight:600;letter-spacing:0.25em;color:#2a6fdb;margin-bottom:clamp(20px,4vh,44px);">CONTACT</div>
+    <h2 data-split-reveal style="font-weight:900;line-height:0.95;letter-spacing:-0.02em;font-size:clamp(44px,10vw,160px);">まずは、<br>お気軽に。</h2>
+    <p data-reveal style="margin:clamp(28px,5vh,48px) 0 clamp(36px,6vh,64px);max-width:560px;font-size:clamp(15px,1.4vw,19px);line-height:1.85;color:#aaa;">大きく始める必要はありません。今いちばん困っているところから、<span style="color:#f0efe8;font-weight:700;">小さく始められます。</span>プロジェクトの規模や要件が固まっていない段階でも、整理するところからお手伝いします。</p>
+
+    <div data-reveal style="background:#f0efe8;color:#0a0a0a;border-radius:28px;padding:clamp(32px,5vw,72px);">
+      <form data-contact-form style="display:flex;flex-direction:column;gap:clamp(22px,3vh,32px);">
+        <!-- Web3Forms config -->
+        <input type="hidden" name="access_key" value="7fb85e8a-4f63-418c-9cd4-e572f9ddc43d">
+        <input type="hidden" name="subject" value="【ミカエルライト】お問い合わせ">
+        <input type="hidden" name="from_name" value="ミカエルライト LP">
+        <!-- Honeypot for spam (must remain empty) -->
+        <input type="checkbox" name="botcheck" style="display:none;" tabindex="-1" autocomplete="off">
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:clamp(20px,3vw,40px);">
+          <label style="display:flex;flex-direction:column;gap:10px;">
+            <span style="font-size:12px;font-weight:900;letter-spacing:0.1em;">お名前 <span style="color:#ff2d78;">*</span></span>
+            <input name="name" type="text" required placeholder="山田 太郎" style="width:100%;border:none;border-bottom:2px solid #0a0a0a;background:transparent;padding:14px 2px;font-size:17px;font-weight:500;font-family:inherit;color:#0a0a0a;outline:none;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:10px;">
+            <span style="font-size:12px;font-weight:900;letter-spacing:0.1em;">会社名</span>
+            <input name="company" type="text" placeholder="株式会社〇〇" style="width:100%;border:none;border-bottom:2px solid #0a0a0a;background:transparent;padding:14px 2px;font-size:17px;font-weight:500;font-family:inherit;color:#0a0a0a;outline:none;">
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:12px;font-weight:900;letter-spacing:0.1em;">メールアドレス <span style="color:#ff2d78;">*</span></span>
+          <input name="email" type="email" required placeholder="you@example.com" style="width:100%;border:none;border-bottom:2px solid #0a0a0a;background:transparent;padding:14px 2px;font-size:17px;font-weight:500;font-family:inherit;color:#0a0a0a;outline:none;">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:12px;font-weight:900;letter-spacing:0.1em;">ご相談内容 <span style="color:#ff2d78;">*</span></span>
+          <textarea name="message" required rows="6" placeholder="プロジェクトの概要、ご予算、ご希望時期、現在お困りのことなど、まだ整理しきれていない段階でも構いません。" style="width:100%;border:2px solid #0a0a0a;border-radius:14px;background:transparent;padding:18px;font-size:16px;font-weight:500;font-family:inherit;color:#0a0a0a;outline:none;resize:vertical;line-height:1.85;"></textarea>
+        </label>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:clamp(8px,2vh,16px);">
+          <p style="font-size:12px;line-height:1.7;color:#666;font-weight:500;max-width:420px;">送信内容は弊社にメールでお届けします。3営業日以内にご返信いたします。</p>
+          <button type="submit" data-magnetic data-submit-btn style="appearance:none;border:none;cursor:pointer;background:#0a0a0a;color:#f0efe8;font-weight:900;font-size:18px;padding:22px 40px;border-radius:100px;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:14px;will-change:transform;letter-spacing:0.04em;transition:opacity .2s;">
+            <span data-submit-label>送信する</span><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#2a6fdb;color:#0a0a0a;font-family:'Space Grotesk',sans-serif;font-size:14px;">→</span>
+          </button>
+        </div>
+        <p data-form-status style="font-size:14px;line-height:1.7;font-weight:700;display:none;padding:14px 18px;border-radius:12px;"></p>
+      </form>
+    </div>
+
+    <div style="margin-top:clamp(60px,12vh,140px);padding-top:28px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;">
+      <div style="display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;">
+        <img src="logo.png" alt="株式会社ミカエルライト" style="width:clamp(80px,7vw,120px);height:auto;filter:brightness(0) invert(1);opacity:0.95;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(40px,8vw,130px);font-weight:700;line-height:0.85;letter-spacing:-0.04em;">MICHAEL<br>LIGHT</div>
+      </div>
+      <div style="font-size:12px;color:#666;line-height:1.9;text-align:right;">株式会社ミカエルライト<br>代表取締役 石川 裕之<br>© 2026 Michael Light Inc.</div>
+    </div>
+  </div>
+</section>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" rx="16" fill="#0a0a0a"/>
+    <text x="50" y="58" font-family="sans-serif" font-size="22" font-weight="900" fill="#2a6fdb" text-anchor="middle">ML</text>
+  </svg>
+</template>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+class Component extends DCLogic {
+  containerRef = (el) => { this._root = el; };
+  renderVals() { return { containerRef: this.containerRef }; }
+
+  componentDidMount() { this._loadLibs().then(() => this._boot()); }
+  componentWillUnmount() { this._teardown(); }
+
+  async _loadLibs() {
+    if (window.__mlLibs) return window.__mlLibs;
+    const load = src => new Promise((r, j) => { const s = document.createElement('script'); s.src = src; s.onload = r; s.onerror = j; document.head.appendChild(s); });
+    window.__mlLibs = (async () => {
+      if (!window.gsap) await load('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js');
+      if (!window.ScrollTrigger) await load('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js');
+      if (!window.Lenis) await load('https://cdn.jsdelivr.net/npm/lenis@1.3.23/dist/lenis.min.js');
+    })();
+    return window.__mlLibs;
+  }
+
+  _boot() {
+    const root = this._root;
+    if (!root) return setTimeout(() => this._boot(), 50);
+    const g = window.gsap, ST = window.ScrollTrigger, L = window.Lenis;
+    if (!g || !ST || !L) return setTimeout(() => this._boot(), 50);
+    if (root.dataset.booted) return;
+    root.dataset.booted = '1';
+    this._dead = false; // reset — a prior teardown may have set this true before a re-mount
+    g.registerPlugin(ST);
+    // limitCallbacks: fire enter/leave callbacks far less often; ignoreMobileResize: skip costly refresh on URL-bar show/hide
+    ST.config({ limitCallbacks: true, ignoreMobileResize: true });
+
+    const q = s => root.querySelector(s);
+    const qa = s => [...root.querySelectorAll(s)];
+    const isTouch = matchMedia('(hover:none)').matches;
+
+    // === GSAP global config ===
+    g.config({ nullTargetWarn: false, force3D: true });
+    g.defaults({ overwrite: 'auto' });
+
+    // === LENIS — desktop only (true mobile/tablet uses native momentum scroll) ===
+    // Strict: only phones/tablets (no hover + coarse pointer). PC with touchscreen is NOT mobile.
+    const isTouchDevice = matchMedia('(hover:none) and (pointer:coarse)').matches;
+    let lenis = null;
+    if (!isTouchDevice) {
+      lenis = new L({
+        lerp: 0.08,
+        smoothWheel: true,
+        autoResize: true,
+        syncTouch: false,
+        wheelMultiplier: 1,
+        gestureOrientation: 'vertical',
+        autoRaf: false,
+      });
+      lenis.on('scroll', ST.update);
+      this._raf = t => lenis.raf(t * 1000);
+      g.ticker.add(this._raf);
+      g.ticker.lagSmoothing(0); // canonical Lenis+GSAP setup — let Lenis own the timing, no catch-up jumps
+      this._lenis = lenis;
+
+      // === SECTION SNAP — desktop only ===
+      // Only the upper content sections detent-stop. Everything from the pinned FLOW
+      // section onward (flow → manifesto → company → contact) scrolls freely so you
+      // can glide past 08 into the next sections without a stop.
+      const snapTargets = ['#top', '#issue', '#strength', '#services']
+        .map(s => q(s)).filter(Boolean);
+
+      // === DETENT SNAP ===
+      // As you scroll, the moment you cross a section head it locks/pauses there once.
+      // Scroll again to continue past. Tall sections stay free to read after the head.
+      let heads = snapTargets.map(s => s.offsetTop).sort((a, b) => a - b);
+      const recomputeHeads = () => { heads = snapTargets.map(s => s.offsetTop).sort((a, b) => a - b); };
+      window.addEventListener('resize', recomputeHeads);
+      this._detentResize = recomputeHeads;
+
+      let prevScroll = lenis.scroll;
+      let snapping = false;
+      let dwellUntil = 0;          // after a detent, brief window where we won't re-detent
+      const DWELL_MS = 90;         // tiny — just long enough to clear the just-snapped head
+      const EDGE = 3;              // px tolerance around a head
+
+      lenis.on('scroll', () => {
+        const cur = lenis.scroll;
+        if (this._navJump) { prevScroll = cur; return; } // skip detent during nav-link / anchor jumps
+        if (snapping) { prevScroll = cur; return; }
+        const now = performance.now();
+        if (now < dwellUntil) { prevScroll = cur; return; }
+        // skip while a pinned ScrollTrigger owns the scroll
+        if (this._ST.getAll().some(t => t.pin && t.isActive)) { prevScroll = cur; return; }
+
+        const dir = cur - prevScroll;
+        let crossed = null;
+        if (dir > 0) {
+          // moving DOWN — first head we passed going down
+          for (let i = 0; i < heads.length; i++) {
+            const h = heads[i];
+            if (h > prevScroll + EDGE && h <= cur + EDGE) { crossed = h; break; }
+          }
+        } else if (dir < 0) {
+          // moving UP — first head we passed going up
+          for (let i = heads.length - 1; i >= 0; i--) {
+            const h = heads[i];
+            if (h < prevScroll - EDGE && h >= cur - EDGE) { crossed = h; break; }
+          }
+        }
+
+        if (crossed != null) {
+          snapping = true;
+          lenis.scrollTo(crossed, {
+            offset: 0,             // align the section's top edge exactly to the viewport top
+            duration: 0.22,        // short & crisp — a stop, not a long magnetic pull
+            easing: t => 1 - Math.pow(1 - t, 2),
+            lock: true,
+            onComplete: () => {
+              // Freeze on the seam, then ABSORB the trackpad's inertia tail: block every
+              // residual wheel event so Lenis never accumulates it, and only release once
+              // the wheel has been quiet for a beat (or a safety cap elapses). This kills
+              // the "drift after releasing your fingers" caused by momentum scrolling.
+              lenis.stop();
+              prevScroll = crossed;
+              let quiet = null, released = false;
+              const release = () => {
+                if (released) return; released = true;
+                window.removeEventListener('wheel', block, true);
+                lenis.start();
+                lenis.scrollTo(crossed, { immediate: true, force: true }); // pin exactly to the seam
+                dwellUntil = performance.now() + DWELL_MS;
+                snapping = false;
+                prevScroll = lenis.scroll;
+              };
+              const block = (e) => {
+                e.preventDefault(); e.stopImmediatePropagation();
+                if (quiet) clearTimeout(quiet);
+                quiet = setTimeout(release, 140); // released 140ms after the last wheel tick
+              };
+              window.addEventListener('wheel', block, { capture: true, passive: false });
+              quiet = setTimeout(release, 140);   // in case no further wheel events arrive
+              setTimeout(release, 900);            // safety cap so it never locks
+            },
+          });
+          return;
+        }
+        prevScroll = cur;
+      });
+    } else {
+      // Touch devices — let iOS native momentum scroll handle everything
+      // Use CSS scroll-snap for sections + native smooth-scroll for anchor links
+      document.documentElement.style.scrollBehavior = 'smooth';
+    }
+
+    // === CURSOR ===
+    const cur = q('[data-cursor]');
+    if (cur && !isTouch) {
+      g.to(cur, { scale: 1, duration: 0.6, delay: 2 });
+      const onMove = e => g.to(cur, { x: e.clientX, y: e.clientY, duration: 0.45, ease: 'power3.out' });
+      window.addEventListener('mousemove', onMove);
+      this._curClean = () => window.removeEventListener('mousemove', onMove);
+      qa('a,[data-magnetic]').forEach(el => {
+        el.addEventListener('mouseenter', () => g.to(cur, { scale: 3, duration: 0.3 }));
+        el.addEventListener('mouseleave', () => g.to(cur, { scale: 1, duration: 0.3 }));
+      });
+    } else if (cur) cur.style.display = 'none';
+
+    // === PRELOADER ===
+    const counter = { v: 0 };
+    const tl = g.timeline();
+    tl.to(counter, { v: 100, duration: 1.4, ease: 'power2.inOut', onUpdate: () => { const el = q('[data-count]'); if (el) el.textContent = String(Math.round(counter.v)).padStart(2, '0'); } });
+    tl.to(q('[data-bar]'), { scaleX: 1, duration: 1.4, ease: 'power2.inOut' }, 0);
+    tl.to(q('[data-preloader]'), { yPercent: -100, duration: 0.85, ease: 'power4.inOut' }, '+=0.2');
+    tl.fromTo(q('[data-hero-topbar]'), { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5');
+    tl.fromTo(q('[data-hero-word-tl]'), { yPercent: 30, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.4, ease: 'expo.out' }, '-=0.4');
+    tl.fromTo(q('[data-hero-word-br]'), { yPercent: -30, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.4, ease: 'expo.out' }, '-=1.2');
+    tl.fromTo(q('[data-hero-textblock]'), { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.9, ease: 'power2.out' }, '-=0.9');
+    tl.fromTo(q('[data-hero-cta]'), { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: 'back.out(1.6)' }, '-=0.5');
+    tl.fromTo(q('[data-hero-scrollhint]'), { opacity: 0 }, { opacity: 1, duration: 0.6 }, '-=0.4');
+
+    // continuous: orb drift + grid drift + ghost echo pulse (tracked for pause)
+    this._heroTweens = [];
+    const trackTween = (tw) => { if (tw) this._heroTweens.push(tw); return tw; };
+    qa('[data-hero-orb]').forEach((el, i) => trackTween(g.to(el, { x: i ? -80 : 80, y: i ? 50 : -50, duration: 12 + i * 3, ease: 'sine.inOut', yoyo: true, repeat: -1 })));
+    // (ghost echo + grid drift removed — cut continuous repaints for a smoother hero)
+    if (q('[data-hero-word-tl]')) trackTween(g.to(q('[data-hero-word-tl]'), { y: -10, duration: 4.5, ease: 'sine.inOut', yoyo: true, repeat: -1 }));
+    if (q('[data-hero-word-br]')) trackTween(g.to(q('[data-hero-word-br]'), { y: 10, duration: 4.5, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.2 }));
+    if (q('[data-hero-period]')) trackTween(g.to(q('[data-hero-period]'), { scale: 1.3, duration: 1.2, ease: 'sine.inOut', yoyo: true, repeat: -1, transformOrigin: '50% 50%' }));
+    // CTA breathing glow
+    if (q('[data-hero-cta]')) trackTween(g.to(q('[data-hero-cta]'), { boxShadow: '0 16px 40px rgba(42,111,219,0.6), 0 0 0 8px rgba(42,111,219,0.10)', duration: 1.8, ease: 'sine.inOut', yoyo: true, repeat: -1 }));
+
+    // === HERO MOUSE PARALLAX (translate-based spotlight for perf) ===
+    const stage = q('[data-hero-stage]');
+    const wTL = q('[data-hero-word-tl]');
+    const wBR = q('[data-hero-word-br]');
+    const spot = q('[data-hero-spot]');
+    if (stage && !stage.dataset.mouseWired && !matchMedia('(hover:none)').matches) {
+      stage.dataset.mouseWired = '1';
+      const tlx = wTL ? g.quickTo(wTL, 'x', { duration: 0.8, ease: 'power3.out' }) : null;
+      const tly = wTL ? g.quickTo(wTL, 'y', { duration: 0.8, ease: 'power3.out' }) : null;
+      const brx = wBR ? g.quickTo(wBR, 'x', { duration: 0.8, ease: 'power3.out' }) : null;
+      const bry = wBR ? g.quickTo(wBR, 'y', { duration: 0.8, ease: 'power3.out' }) : null;
+      const spotX = spot ? g.quickTo(spot, 'x', { duration: 0.7, ease: 'power3.out' }) : null;
+      const spotY = spot ? g.quickTo(spot, 'y', { duration: 0.7, ease: 'power3.out' }) : null;
+      stage._heroMouse = { x: 0.5, y: 0.5 };
+      const onMove = e => {
+        const r = stage.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        stage._heroMouse.x = px; stage._heroMouse.y = py;
+        if (tlx) tlx((px - 0.5) * -30); if (tly) tly((py - 0.5) * -16);
+        if (brx) brx((px - 0.5) * 30); if (bry) bry((py - 0.5) * 16);
+        // translate-only spotlight (no repaint of gradient)
+        if (spotX) spotX((px - 0.5) * r.width * 0.6);
+        if (spotY) spotY((py - 0.5) * r.height * 0.6);
+      };
+      stage.addEventListener('mousemove', onMove, { passive: true });
+    }
+
+    // === WIREFRAME SCULPTURE CANVAS (optimized + viewport-paused; skipped on mobile) ===
+    const cv = q('[data-hero-canvas]');
+    if (cv && isTouchDevice) {
+      // mobile: skip canvas entirely — too heavy for phone GPU
+      cv.style.display = 'none';
+    } else if (cv && !cv.dataset.wired) {
+      cv.dataset.wired = '1';
+      const ctx = cv.getContext('2d', { alpha: true });
+      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      const resize = () => {
+        const r = cv.getBoundingClientRect();
+        cv.width = r.width * dpr; cv.height = r.height * dpr;
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+      };
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Pause canvas AND all hero ambient tweens — pause aggressively as soon as scroll starts leaving Hero
+      const stageEl2 = q('[data-hero-stage]');
+      this._canvasVisible = true;
+      if (stageEl2 && 'IntersectionObserver' in window) {
+        this._heroIO = new IntersectionObserver((entries) => {
+          entries.forEach(en => {
+            // 60%+ of Hero must be visible to draw — otherwise pause (frees GPU during transitions)
+            const visible = en.intersectionRatio > 0.6;
+            this._canvasVisible = visible;
+            if (this._heroTweens) this._heroTweens.forEach(tw => { if (visible) tw.play(); else tw.pause(); });
+          });
+        }, { threshold: [0, 0.3, 0.6, 0.9] });
+        this._heroIO.observe(stageEl2);
+      }
+
+      // Reduced point count + sparser connections (~55% the work, same look)
+      const N = 600;
+      const pts = [];
+      for (let i=0;i<N;i++){
+        const t = i / (N-1);
+        const phi = Math.acos(1 - 2*t);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+        pts.push({
+          x: Math.sin(phi)*Math.cos(theta),
+          y: Math.sin(phi)*Math.sin(theta),
+          z: Math.cos(phi),
+          n: Math.random()*Math.PI*2
+        });
+      }
+      let t0 = performance.now();
+      const stageEl = q('[data-hero-stage]');
+      const proj = new Array(N);
+      // 30fps cap — halves CPU/GPU load, motion stays smooth
+      let frameToggle = 0;
+      const draw = () => {
+        if (this._dead) return;
+        // skip frame entirely when off-screen
+        if (!this._canvasVisible) { this._heroRaf = requestAnimationFrame(draw); return; }
+        // throttle to ~30fps (every other frame)
+        frameToggle ^= 1;
+        if (frameToggle) { this._heroRaf = requestAnimationFrame(draw); return; }
+        const r = cv.getBoundingClientRect();
+        const w = r.width, h = r.height;
+        ctx.clearRect(0,0,w,h);
+        const cx = w*0.55, cy = h*0.5;
+        const baseR = Math.min(w,h) * 0.38;
+        const maxD = baseR * 0.35;
+        const tm = (performance.now() - t0) * 0.001;
+        const mx = stageEl?._heroMouse?.x ?? 0.5;
+        const my = stageEl?._heroMouse?.y ?? 0.5;
+        const rotY = tm * 0.18 + (mx - 0.5) * 0.8;
+        const rotX = -0.4 + (my - 0.5) * 0.6;
+        const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+        const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+        // project
+        for (let i=0;i<N;i++){
+          const p = pts[i];
+          const noise = 1 + 0.42 * Math.sin(p.n + tm*0.9 + p.x*2.4) * Math.cos(p.n*1.3 + tm*0.7 + p.y*2.1);
+          const x0 = p.x * noise, y0 = p.y * noise, z0 = p.z * noise;
+          const x1 = x0*cosY + z0*sinY;
+          const z1 = -x0*sinY + z0*cosY;
+          const y1 = y0*cosX - z1*sinX;
+          const z2 = y0*sinX + z1*cosX;
+          const persp = 2.2 / (2.2 - z2);
+          let pr = proj[i];
+          if (!pr) pr = proj[i] = { x:0,y:0,z:0,persp:0 };
+          pr.x = cx + x1*baseR*persp; pr.y = cy + y1*baseR*persp; pr.z = z2; pr.persp = persp;
+        }
+        // connections — only 4 neighbors, batched by hue to reduce style switches
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.lineWidth = 0.6;
+        for (let i=0;i<N;i++){
+          const a = proj[i];
+          for (let k=1;k<=4;k++){
+            const j = (i + k*7) % N;
+            const b = proj[j];
+            const dx = a.x-b.x, dy = a.y-b.y;
+            const d2 = dx*dx + dy*dy;
+            if (d2 > maxD*maxD) continue;
+            const d = Math.sqrt(d2);
+            const alpha = (1 - d/maxD) * 0.18 * (a.persp+b.persp)*0.5;
+            const zAvg = (a.z + b.z) * 0.5;
+            const hue = 200 + (1-zAvg)*70;
+            ctx.strokeStyle = 'hsla(' + hue + ',95%,65%,' + alpha + ')';
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+          }
+        }
+        // sparser dots
+        for (let i=0;i<N;i+=3){
+          const p = proj[i];
+          const s = 0.5 + p.persp * 0.5;
+          const hue = 200 + (1-p.z)*70;
+          ctx.fillStyle = 'hsla(' + hue + ',95%,75%,' + (0.35*p.persp) + ')';
+          ctx.fillRect(p.x-s/2, p.y-s/2, s, s);
+        }
+        ctx.globalCompositeOperation = 'source-over';
+        this._heroRaf = requestAnimationFrame(draw);
+      };
+      this._heroRaf = requestAnimationFrame(draw);
+    }
+
+    // === MAGNETIC BUTTONS ===
+    if (!isTouch) {
+      qa('[data-magnetic]').forEach(btn => {
+        btn.addEventListener('mousemove', e => {
+          const r = btn.getBoundingClientRect();
+          g.to(btn, { x: (e.clientX - r.left - r.width / 2) * 0.35, y: (e.clientY - r.top - r.height / 2) * 0.35, duration: 0.4, ease: 'power3.out' });
+        });
+        btn.addEventListener('mouseleave', () => g.to(btn, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1,0.3)' }));
+      });
+    }
+
+    // === NAV (works with or without Lenis) ===
+    qa('[data-nav-link]').forEach(a => a.addEventListener('click', e => {
+      const h = a.getAttribute('href'); if (!h || !h.startsWith('#')) return;
+      e.preventDefault();
+      const t = root.querySelector(h);
+      if (!t) return;
+      // Disable detent snapping for the duration of the programmatic jump so it
+      // doesn't get hijacked at an intermediate section head.
+      this._navJump = true;
+      const done = () => { this._navJump = false; };
+      if (lenis) {
+        lenis.scrollTo(t, { duration: 1.2, lock: true, onComplete: done });
+      } else {
+        const r = t.getBoundingClientRect();
+        window.scrollTo({ top: window.scrollY + r.top, behavior: 'smooth' });
+        setTimeout(done, 1200);
+      }
+    }));
+
+    // === FORM (Web3Forms) ===
+    const form = q('[data-contact-form]');
+    if (form && !form.dataset.w) {
+      form.dataset.w = '1';
+      const st = q('[data-form-status]');
+      const btn = q('[data-submit-btn]');
+      const label = q('[data-submit-label]');
+      const setStatus = (kind, msg) => {
+        if (!st) return;
+        st.style.display = 'block';
+        st.textContent = msg;
+        if (kind === 'success') { st.style.background = 'rgba(42,111,219,0.12)'; st.style.color = '#1652b8'; }
+        else if (kind === 'error') { st.style.background = 'rgba(255,45,120,0.10)'; st.style.color = '#c81f5e'; }
+        else { st.style.background = 'rgba(10,10,10,0.06)'; st.style.color = '#444'; }
+      };
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!form.reportValidity()) return;
+        // honeypot check
+        if (form.botcheck && form.botcheck.checked) return;
+        if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'wait'; }
+        if (label) label.textContent = '送信中…';
+        setStatus('info', '送信しています…');
+        try {
+          const fd = new FormData(form);
+          const res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: fd,
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data && data.success) {
+            setStatus('success', '送信が完了しました。3営業日以内にご返信いたします。');
+            form.reset();
+            if (label) label.textContent = '送信完了';
+          } else {
+            const msg = (data && data.message) ? data.message : '通信エラーが発生しました。';
+            setStatus('error', '送信に失敗しました：' + msg + ' しばらくしてから再度お試しください。');
+            if (label) label.textContent = '送信する';
+          }
+        } catch (err) {
+          setStatus('error', '送信に失敗しました。ネットワーク状況をご確認の上、再度お試しください。');
+          if (label) label.textContent = '送信する';
+        } finally {
+          if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+        }
+      });
+    }
+
+    // === SCROLL ANIMATIONS (all in buildScroll for watchdog recovery) ===
+    this._g = g; this._ST = ST;
+
+    // Establish the watchdog FIRST so that even if a build throws, recovery still polls.
+    // Polls for ~15s and rebuilds whenever our triggers have been wiped (handles late
+    // remounts from slow/flaky CDN loads). Gates on real DOM presence, not the _dead flag.
+    let wdTicks = 0;
+    if (this._wdInterval) clearInterval(this._wdInterval);
+    this._wdInterval = setInterval(() => {
+      if (!document.contains(root)) { clearInterval(this._wdInterval); return; }
+      wdTicks++;
+      if (ST.getAll().length === 0) { this._dead = false; try { this._buildScroll(); } catch (e) {} }
+      else if (wdTicks % 3 === 0) { ST.refresh(); }
+      if (wdTicks >= 12) clearInterval(this._wdInterval);
+    }, 1200);
+
+    try { this._buildScroll(); } catch (e) {}
+  }
+
+  _buildScroll() {
+    const g = this._g, ST = this._ST, root = this._root;
+    if (!g || !ST || !root) return;
+    g.registerPlugin(ST); // idempotent re-register — guards against CDN load races dropping the plugin
+    const q = s => root.querySelector(s);
+    const qa = s => [...root.querySelectorAll(s)];
+
+    // kill previous
+    try { (this._sts || []).forEach(t => t.kill()); } catch (e) {}
+    const before = new Set(ST.getAll());
+
+    // --- PARALLAX (generic, skip hero; scrub with inertia for smoothness) ---
+    qa('[data-parallax]').forEach(el => {
+      if (el.closest('#top')) return;
+      const sp = parseFloat(el.dataset.parallax) || 0.3;
+      g.to(el, { y: () => sp * 240, ease: 'none', scrollTrigger: { trigger: el.closest('section'), start: 'top bottom', end: 'bottom top', scrub: 0.8 } });
+    });
+
+    // (hero scroll exit removed — text stays visible while leaving naturally)
+
+
+
+    // --- HORIZONTAL SCROLL (flow) ---
+    qa('[data-hscroll]').forEach(sec => {
+      const tr = sec.querySelector('[data-track]'); if (!tr) return;
+      const dist = () => Math.max(0, tr.scrollWidth - innerWidth);
+      g.to(tr, { x: () => -dist(), ease: 'none', scrollTrigger: { trigger: sec, start: 'top top', end: () => '+=' + dist(), scrub: true, pin: true, anticipatePin: 1, invalidateOnRefresh: true } });
+    });
+
+    // --- MANIFESTO ZOOM ---
+    const zs = q('[data-zoom-section]'), zm = q('[data-zoom]');
+    if (zs && zm) {
+      const eb = q('[data-zoom-eyebrow]');
+      const ztl = g.timeline({ scrollTrigger: { trigger: zs, start: 'top top', end: '+=160%', pin: true, scrub: true, anticipatePin: 1, invalidateOnRefresh: true } });
+      ztl.fromTo(zm, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, ease: 'power2.out', duration: 0.28 });
+      if (eb) ztl.fromTo(eb, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.16 }, 0.04);
+      ztl.to(zm, { scale: 7, ease: 'power2.in', duration: 0.6 }, 0.34);
+      if (eb) ztl.to(eb, { opacity: 0, duration: 0.16 }, 0.36);
+      ztl.to(zm, { opacity: 0, ease: 'power1.in', duration: 0.18 }, 0.8);
+    }
+
+    // --- SERVICES scrollytelling ---
+    qa('#services [data-svc-num]').forEach(el => g.fromTo(el, { x: -28, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%' } }));
+    qa('#services [data-svc-line]').forEach(el => g.fromTo(el, { yPercent: 120 }, { yPercent: 0, duration: 0.9, ease: 'power4.out', scrollTrigger: { trigger: el, start: 'top 90%' } }));
+    qa('#services [data-svc-rule]').forEach(el => g.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
+    const progs = qa('#services [data-svc-prog]');
+    qa('#services [data-svc-block]').forEach((b, i) => {
+      ST.create({ trigger: b, start: 'top 55%', end: 'bottom 55%', onToggle: self => {
+        const p = progs[i]; if (!p) return;
+        if (self.isActive) { p.style.opacity = '1'; p.style.color = p.dataset.accent || '#0a0a0a'; }
+        else { p.style.opacity = '0.3'; p.style.color = '#0a0a0a'; }
+      }});
+    });
+
+    // --- COUNTERS ---
+    qa('[data-counter]').forEach(el => {
+      const target = parseInt(el.dataset.counter, 10);
+      const obj = { v: 0 };
+      g.to(obj, { v: target, duration: 1.4, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 85%' },
+        onUpdate: () => { el.textContent = Math.round(obj.v); }
+      });
+    });
+
+    // --- ISSUE section dramatic entry ---
+    const issueSec = q('#issue');
+    const issueHeadline = q('[data-issue-headline]');
+    if (issueSec && issueHeadline) {
+      // Per-character split (CJK char-by-char, latin word-by-word, skip nested SVG)
+      const charSpans = [];
+      if (!issueHeadline.dataset.split) {
+        issueHeadline.dataset.split = '1';
+        const walker = document.createTreeWalker(issueHeadline, NodeFilter.SHOW_TEXT, {
+          acceptNode: n => (n.parentElement && n.parentElement.closest('svg')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+        });
+        const textNodes = [];
+        let n; while ((n = walker.nextNode())) textNodes.push(n);
+        textNodes.forEach(tn => {
+          const text = tn.nodeValue;
+          if (!text || !text.trim()) return;
+          const frag = document.createDocumentFragment();
+          text.split(/(\s+)/).forEach(part => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            const chunks = part.match(/[\u3000-\u9fff\uff00-\uffef\u3001-\u303f]|[^\s\u3000-\u9fff\uff00-\uffef\u3001-\u303f]+/g) || [part];
+            chunks.forEach(c => {
+              const span = document.createElement('span');
+              span.style.cssText = 'display:inline-block;';
+              span.dataset.sp = '1';
+              span.textContent = c;
+              frag.appendChild(span);
+              charSpans.push(span);
+            });
+          });
+          tn.parentNode.replaceChild(frag, tn);
+        });
+      } else {
+        charSpans.push(...issueHeadline.querySelectorAll('[data-sp]'));
+      }
+
+      const flash1 = q('[data-issue-flash]');
+      const flash2 = q('[data-issue-flash2]');
+      const issueBg = q('[data-issue-bg]');
+      const issueEb = q('[data-issue-eyebrow]');
+      const marker = q('[data-issue-marker] path');
+
+      const tl = g.timeline({ scrollTrigger: { trigger: issueSec, start: 'top 78%', toggleActions: 'play none none reverse', invalidateOnRefresh: true } });
+      // shock flashes
+      if (flash1) tl.fromTo(flash1, { scaleX: 0, transformOrigin: 'left center' }, { scaleX: 1, duration: 0.42, ease: 'expo.out' }, 0)
+                   .to(flash1, { scaleX: 0, transformOrigin: 'right center', duration: 0.5, ease: 'expo.in' }, 0.55);
+      if (flash2) tl.fromTo(flash2, { scaleX: 0, transformOrigin: 'right center' }, { scaleX: 1, duration: 0.35, ease: 'expo.out' }, 0.08)
+                   .to(flash2, { scaleX: 0, transformOrigin: 'left center', duration: 0.45, ease: 'expo.in' }, 0.6);
+      // bg word soft fade in
+      if (issueBg) tl.fromTo(issueBg, { opacity: 0, scale: 1.15 }, { opacity: 1, scale: 1, duration: 1.2, ease: 'power3.out' }, 0.15);
+      // eyebrow flying in
+      if (issueEb) tl.fromTo(issueEb, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }, 0.35);
+      // headline characters drop — line-level reveal instead of per-char (much lighter)
+      if (charSpans.length) {
+        tl.fromTo(charSpans, { yPercent: -100, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: { each: 0.012, from: 'start' } }, 0.3);
+      }
+      // marker underline draws in after headline lands
+      if (marker) tl.fromTo(marker, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.85, ease: 'power2.out' }, 1.1);
+
+      // (removed continuous bg-word transform — caused scroll jank on the huge 520px text)
+
+      // --- SUBTITLE: per-chunk tumble in ---
+      const sub = q('[data-issue-sub]');
+      if (sub) {
+        const subSpans = [];
+        if (!sub.dataset.split) {
+          sub.dataset.split = '1';
+          const w = document.createTreeWalker(sub, NodeFilter.SHOW_TEXT, null);
+          const tns = []; let nn; while ((nn = w.nextNode())) tns.push(nn);
+          tns.forEach(tn => {
+            const text = tn.nodeValue;
+            if (!text || !text.trim()) return;
+            const frag = document.createDocumentFragment();
+            // chunk by ~3-4 CJK chars or per word for latin
+            const tokens = text.match(/[\u3000-\u9fff\uff00-\uffef]{1,3}|[^\s\u3000-\u9fff\uff00-\uffef]+|\s+/g) || [text];
+            tokens.forEach(c => {
+              if (/^\s+$/.test(c)) { frag.appendChild(document.createTextNode(c)); return; }
+              const span = document.createElement('span');
+              span.style.cssText = 'display:inline-block;';
+              span.dataset.sp = '1';
+              span.textContent = c;
+              frag.appendChild(span);
+              subSpans.push(span);
+            });
+            tn.parentNode.replaceChild(frag, tn);
+          });
+        } else {
+          subSpans.push(...sub.querySelectorAll('[data-sp]'));
+        }
+        if (subSpans.length) {
+          g.fromTo(subSpans, { y: 16, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out', stagger: { each: 0.012, from: 'start' },
+              scrollTrigger: { trigger: sub, start: 'top 85%' } });
+        }
+      }
+
+      // --- LABELS: simple fade in ---
+      qa('[data-issue-label] [data-label-inner]').forEach(inner => {
+        g.fromTo(inner, { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: 'power3.out', scrollTrigger: { trigger: inner.closest('[data-issue-label]'), start: 'top 88%' } });
+      });
+
+      // --- CARDS: simple stagger fade up ---
+      const cards = qa('[data-issue-card]');
+      const cardsWrap = q('[data-issue-cards]');
+      if (cards.length && cardsWrap) {
+        const ctl = g.timeline({ scrollTrigger: { trigger: cardsWrap, start: 'top 82%', toggleActions: 'play none none reverse' } });
+        cards.forEach((card, i) => {
+          ctl.fromTo(card,
+            { y: 40, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' },
+            i * 0.1);
+        });
+
+        // 3D hover tilt
+        if (!matchMedia('(hover:none)').matches) {
+          cards.forEach(card => {
+            const rotX = g.quickTo(card, 'rotationX', { duration: 0.5, ease: 'power3.out' });
+            const rotY = g.quickTo(card, 'rotationY', { duration: 0.5, ease: 'power3.out' });
+            const tz = g.quickTo(card, 'z', { duration: 0.5, ease: 'power3.out' });
+            card.addEventListener('mousemove', e => {
+              const r = card.getBoundingClientRect();
+              const px = (e.clientX - r.left) / r.width - 0.5;
+              const py = (e.clientY - r.top) / r.height - 0.5;
+              rotY(px * 10); rotX(-py * 8); tz(30);
+            });
+            card.addEventListener('mouseleave', () => { rotY(0); rotX(0); tz(0); });
+          });
+        }
+      }
+
+      // --- COMPARISON: simple fade up + row stagger ---
+      const comp = q('[data-issue-comp]');
+      if (comp) {
+        const rows = comp.querySelectorAll('tbody tr');
+        const ctl = g.timeline({ scrollTrigger: { trigger: comp, start: 'top 82%', toggleActions: 'play none none reverse' } });
+        ctl.fromTo(comp, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }, 0);
+        if (rows.length) ctl.fromTo(rows, { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power3.out', stagger: 0.06 }, 0.2);
+      }
+
+      // --- CONCLUSION: simple scale+fade ---
+      const conc = q('[data-issue-conclusion]');
+      if (conc) {
+        const cCta = q('[data-conclusion-cta]');
+        const ctl = g.timeline({ scrollTrigger: { trigger: conc, start: 'top 85%', toggleActions: 'play none none reverse' } });
+        ctl.fromTo(conc, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.75, ease: 'power3.out' }, 0);
+        if (cCta) ctl.fromTo(cCta, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(1.6)' }, 0.3);
+      }
+    }
+
+    // --- SPLIT REVEALS (word-by-word, text-nodes only) ---
+    qa('[data-split-reveal]').forEach(h => {
+      const words = [];
+      if (!h.dataset.split) {
+        h.dataset.split = '1';
+        const walker = document.createTreeWalker(h, NodeFilter.SHOW_TEXT, null);
+        const textNodes = [];
+        let n; while ((n = walker.nextNode())) textNodes.push(n);
+        textNodes.forEach(tn => {
+          const text = tn.nodeValue;
+          if (!text || !text.trim()) return;
+          const frag = document.createDocumentFragment();
+          text.split(/(\s+)/).forEach(part => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            // split CJK per-character, latin per-word
+            const chunks = part.match(/[\u3000-\u9fff\uff00-\uffef]|[^\s\u3000-\u9fff\uff00-\uffef]+/g) || [part];
+            chunks.forEach(c => {
+              const span = document.createElement('span');
+              span.style.cssText = 'display:inline-block;';
+              span.dataset.sp = '1';
+              span.textContent = c;
+              frag.appendChild(span);
+              words.push(span);
+            });
+          });
+          tn.parentNode.replaceChild(frag, tn);
+        });
+      } else {
+        words.push(...h.querySelectorAll('[data-sp]'));
+      }
+      if (words.length) g.fromTo(words, { yPercent: 80, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.8, ease: 'power4.out', stagger: 0.025, scrollTrigger: { trigger: h, start: 'top 82%' } });
+    });
+
+    // --- GENERIC REVEALS ---
+    qa('[data-reveal]').forEach(el => {
+      g.fromTo(el, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+    });
+
+    this._sts = ST.getAll().filter(t => !before.has(t));
+    ST.refresh();
+    if (this._lenis?.resize) try { this._lenis.resize(); } catch (e) {}
+    ST.refresh();
+  }
+
+  _teardown() {
+    this._dead = true;
+    if (this._heroRaf) cancelAnimationFrame(this._heroRaf);
+    if (this._wdInterval) clearInterval(this._wdInterval);
+    if (this._heroIO) try { this._heroIO.disconnect(); } catch (e) {}
+    try { (this._sts || []).forEach(t => t.kill()); } catch (e) {}
+    if (this._raf && window.gsap) try { window.gsap.ticker.remove(this._raf); } catch (e) {}
+    if (this._lenis) try { this._lenis.destroy(); } catch (e) {}
+    if (this._curClean) this._curClean();
+    if (this._root) delete this._root.dataset.booted;
+  }
+}
+</script>
+</body>
+</html>
