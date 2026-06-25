@@ -1,9 +1,0 @@
-{
-  "name": "michael-light-lp",
-  "private": true,
-  "version": "1.0.0",
-  "description": "株式会社ミカエルライト システム開発LP（静的・ビルド不要）",
-  "scripts": {
-    "dev": "npx --yes serve -l 4321 ."
-  }
-}
